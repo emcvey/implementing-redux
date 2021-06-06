@@ -38,7 +38,14 @@ describe('dedux', () => {
 
       it(`dispatch should take any dispatched action and run it 
           through the reducer function to produce a new state.`, () => {
-        const reducer = () => {} // Your reducer function here!
+        const reducer = (state = { foo: 'bar' }, action) => {
+          if (action) {
+            if (action.type === 'BAZIFY') {
+              state.foo = 'baz'
+            }
+          }
+          return state
+        }
 
         const store = createStore(reducer)
 
