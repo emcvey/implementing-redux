@@ -6,7 +6,8 @@ export default {
 function createStore(reducerFn) {
   let currentState = reducerFn()
   let reducer = reducerFn
-  let subscribers = []
+  let subscribers = {}
+  let nextSubscriberId = 1
   if (typeof reducerFn !== 'function') {
     throw Error('The reducer passed must be a function')
   }
@@ -23,7 +24,7 @@ function createStore(reducerFn) {
     }
 
     currentState = reducer(currentState, action)
-    subscribers.forEach(subscribeFn => {
+    Object.values(subscribers).forEach(subscribeFn => {
       subscribeFn(currentState)
     })
   }
@@ -37,7 +38,19 @@ function createStore(reducerFn) {
       throw Error('The subscriber must pass a function')
     }
 
-    subscribers.push(subscribeFn)
+    const subscriptionId = nextSubscriberId
+    subscribers[`${subscriptionId}`] = subscribeFn
+    nextSubscriberId++
+
+    function unsubscribe() {
+      if (subscribers[subscriptionId]) {
+        delete subscribers[subscriptionId]
+      } else {
+        throw Error('This subscription has already been unsubscribed')
+      }
+    }
+
+    return unsubscribe
   }
 
   const store = {
