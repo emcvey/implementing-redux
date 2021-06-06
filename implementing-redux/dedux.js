@@ -6,8 +6,9 @@ export default {
 function createStore(reducerFn) {
   let currentState = reducerFn()
   let reducer = reducerFn
+  let subscribers = []
   if (typeof reducerFn !== 'function') {
-    throw Error('The reducer passed must be a function.')
+    throw Error('The reducer passed must be a function')
   }
 
   function dispatch(action) {
@@ -22,15 +23,27 @@ function createStore(reducerFn) {
     }
 
     currentState = reducer(currentState, action)
+    subscribers.forEach(subscribeFn => {
+      subscribeFn(currentState)
+    })
   }
 
   function getState() {
     return currentState
   }
 
+  function subscribe(subscribeFn) {
+    if (typeof subscribeFn !== 'function') {
+      throw Error('The subscriber must pass a function')
+    }
+
+    subscribers.push(subscribeFn)
+  }
+
   const store = {
     dispatch,
     getState,
+    subscribe,
   }
 
   return store
