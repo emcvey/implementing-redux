@@ -1,5 +1,5 @@
 import Dedux from './dedux.js'
-const { createStore } = Dedux
+const { applyMiddleware, createStore } = Dedux
 
 const defaultState = { count: 0 }
 const reducer = (state = defaultState, action = {}) => {
@@ -9,6 +9,8 @@ const reducer = (state = defaultState, action = {}) => {
     state.count = state.count - 1
   } else if (action.type === 'RESET') {
     state.count = 0
+  } else if (action.type === 'SET') {
+    state.count = action.value
   }
 
   return state
@@ -16,15 +18,30 @@ const reducer = (state = defaultState, action = {}) => {
 
 const store = createStore(reducer)
 
-window.increaseCounter = function() {
+const saveCountMiddleware = store => next => action => {
+  next(action)
+  let state = store.getState()
+  localStorage.setItem('count', state.count)
+}
+
+applyMiddleware(store, [saveCountMiddleware])
+
+window.onload = () => {
+  const localCount = localStorage.count
+  if (localCount) {
+    store.dispatch({ type: 'SET', value: parseInt(localCount) })
+  }
+}
+
+window.increaseCounter = () => {
   store.dispatch({ type: 'INCREASE' })
 }
 
-window.decreaseCounter = function() {
+window.decreaseCounter = () => {
   store.dispatch({ type: 'DECREASE' })
 }
 
-window.resetCounter = function() {
+window.resetCounter = () => {
   store.dispatch({ type: 'RESET' })
 }
 
