@@ -62,4 +62,10 @@ function createStore(reducerFn) {
   return store
 }
 
-function applyMiddleware() {}
+function applyMiddleware(store, middlewares) {
+  const middlewareFns = middlewares.map(middleware => middleware())
+
+  store.dispatch = compose(...middlewareFns)(store.dispatch)
+}
+
+const compose = (...fns) => x => fns.reduce((y, f) => f(y), x)
