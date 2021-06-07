@@ -38,7 +38,12 @@ describe('dedux', () => {
 
       it(`dispatch should take any dispatched action and run it 
           through the reducer function to produce a new state.`, () => {
-        const reducer = () => {} // Your reducer function here!
+        const reducer = (state = { foo: 'bar' }, action = {}) => {
+          if (action.type === 'BAZIFY') {
+            state.foo = 'baz'
+          }
+          return state
+        }
 
         const store = createStore(reducer)
 
@@ -95,10 +100,24 @@ describe('dedux', () => {
         store.dispatch({ type: 'CALCULATE_MEANING_OF_LIFE' })
         expect(subscriber).toHaveBeenCalledTimes(1)
       })
+
+      it('errors if unsubscribe is called more than once', () => {
+        const subscriber = jest.fn()
+        const store = createStore(() => {})
+
+        const unsubscribe = store.subscribe(subscriber)
+
+        // unsubscribe the first time
+        unsubscribe()
+
+        expect(() => {
+          unsubscribe()
+        }).toThrow()
+      })
     })
   })
 
-  describe.skip('applyMiddleware', () => {
+  describe('applyMiddleware', () => {
     // Don't start this until you've completed part 2 of the challenge
     it('can apply middleware to dispatched actions', () => {
       const reducer = () => null
